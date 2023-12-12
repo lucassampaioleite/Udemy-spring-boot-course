@@ -1,7 +1,7 @@
 package leite.sampaio.lucas.controllers;
 
-import leite.sampaio.lucas.services.PersonServices;
 import leite.sampaio.lucas.model.Person;
+import leite.sampaio.lucas.services.PersonServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +16,7 @@ public class PersonController {
     private PersonServices service;
 
     @GetMapping(value = "/{id}")
-    public ResponseEntity<Person> findById(@PathVariable(value = "id") String id) {
+    public ResponseEntity<Person> findById(@PathVariable(value = "id") Long id) {
         return ResponseEntity.ok().body(service.findById(id));
     }
 
@@ -36,7 +36,7 @@ public class PersonController {
     }
 
     @DeleteMapping(value = "/{id}")
-    public ResponseEntity<Void> delete(@PathVariable(value = "id") String id) {
+    public ResponseEntity<Void> delete(@PathVariable(value = "id") Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
     }
