@@ -1,16 +1,15 @@
 package leite.sampaio.lucas.services;
 
+import leite.sampaio.lucas.dto.PersonDTO;
 import leite.sampaio.lucas.exceptions.ResourceNotFoundException;
+import leite.sampaio.lucas.mapper.ObjectMapper;
 import leite.sampaio.lucas.model.Person;
 import leite.sampaio.lucas.repositories.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @Service
 public class PersonServices {
@@ -19,32 +18,34 @@ public class PersonServices {
     @Autowired
     PersonRepository repository;
 
-    public Person findById(Long id) {
+    public PersonDTO findById(Long id) {
         logger.info("Finding one person!");
-        return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("No records found for this ID!"));
+        return ObjectMapper.parseObject(repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("No records found for this ID!")), PersonDTO.class);
     }
 
-    public List<Person> findAll() {
+    public List<PersonDTO> findAll() {
         logger.info("Finding all people!");
-        return repository.findAll();
+        return ObjectMapper.parseListObjects(repository.findAll(), PersonDTO.class);
     }
 
-    public Person create(Person person) {
+    public PersonDTO create(PersonDTO personDTO) {
         logger.info("Creating one person!");
-        return repository.save(person);
+        var entity = repository.save(ObjectMapper.parseObject(personDTO, Person.class));
+        return ObjectMapper.parseObject(entity, PersonDTO.class);
     }
 
-    public Person update(Person person) {
+    public PersonDTO update(PersonDTO personDTO) {
         logger.info("Updating one person!");
-        var entity = repository.findById(person.getId())
+        var entity = repository.findById(personDTO.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("No records found for this ID!"));
 
-        entity.setFirstName(person.getFirstName());
-        entity.setLastName(person.getLastName());
-        entity.setAddress(person.getAddress());
-        entity.setGender(person.getGender());
+        entity.setFirstName(personDTO.getFirstName());
+        entity.setLastName(personDTO.getLastName());
+        entity.setAddress(personDTO.getAddress());
+        entity.setGender(personDTO.getGender());
 
-        return repository.save(entity);
+        return ObjectMapper.parseObject(repository.save(entity), PersonDTO.class);
     }
 
     public void delete(Long id) {

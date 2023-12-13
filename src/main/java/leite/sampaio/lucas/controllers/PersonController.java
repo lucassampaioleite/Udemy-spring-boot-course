@@ -1,6 +1,6 @@
 package leite.sampaio.lucas.controllers;
 
-import leite.sampaio.lucas.model.Person;
+import leite.sampaio.lucas.dto.PersonDTO;
 import leite.sampaio.lucas.services.PersonServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,23 +16,23 @@ public class PersonController {
     private PersonServices service;
 
     @GetMapping(value = "/{id}")
-    public ResponseEntity<Person> findById(@PathVariable(value = "id") Long id) {
+    public ResponseEntity<PersonDTO> findById(@PathVariable(value = "id") Long id) {
         return ResponseEntity.ok().body(service.findById(id));
     }
 
     @GetMapping
-    public ResponseEntity<List<Person>> findAll() {
+    public ResponseEntity<List<PersonDTO>> findAll() {
         return ResponseEntity.ok().body(service.findAll());
     }
 
     @PostMapping
-    public ResponseEntity<Person> create(@RequestBody Person person) {
-        return ResponseEntity.ok().body(service.create(person));
+    public ResponseEntity<PersonDTO> create(@RequestBody PersonDTO personDTO) {
+        return ResponseEntity.ok().body(service.create(personDTO));
     }
 
     @PutMapping
-    public ResponseEntity<Person> update(@RequestBody Person person) {
-        return ResponseEntity.ok().body(service.update(person));
+    public ResponseEntity<PersonDTO> update(@RequestBody PersonDTO personDTO) {
+        return ResponseEntity.ok().body(service.update(personDTO));
     }
 
     @DeleteMapping(value = "/{id}")
