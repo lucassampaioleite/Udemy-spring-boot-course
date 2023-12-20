@@ -1,5 +1,6 @@
 package leite.sampaio.lucas.services;
 
+import leite.sampaio.lucas.controllers.PersonController;
 import leite.sampaio.lucas.dto.PersonDTO;
 import leite.sampaio.lucas.exceptions.ResourceNotFoundException;
 import leite.sampaio.lucas.mapper.ObjectMapper;
@@ -11,6 +12,9 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.logging.Logger;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 @Service
 public class PersonServices {
 
@@ -20,24 +24,40 @@ public class PersonServices {
 
     public PersonDTO findById(Long id) {
         logger.info("Finding one person!");
-        return ObjectMapper.parseObject(repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("No records found for this ID!")), PersonDTO.class);
+
+        var entity = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("No records found for this ID!"));
+
+        var dto = ObjectMapper.parseObject(entity, PersonDTO.class);
+        dto.add(linkTo(methodOn(PersonController.class).findById(id)).withSelfRel());
+
+        return dto;
     }
 
     public List<PersonDTO> findAll() {
         logger.info("Finding all people!");
-        return ObjectMapper.parseListObjects(repository.findAll(), PersonDTO.class);
+
+        var dtos = ObjectMapper.parseListObjects(repository.findAll(), PersonDTO.class);
+        dtos.forEach(p -> p.add(linkTo(methodOn(PersonController.class).findById(p.getKey())).withSelfRel()));
+
+        return dtos;
     }
 
     public PersonDTO create(PersonDTO personDTO) {
         logger.info("Creating one person!");
+
         var entity = repository.save(ObjectMapper.parseObject(personDTO, Person.class));
-        return ObjectMapper.parseObject(entity, PersonDTO.class);
+
+        var dto = ObjectMapper.parseObject(entity, PersonDTO.class);
+        dto.add(linkTo(methodOn(PersonController.class).findById(dto.getKey())).withSelfRel());
+
+        return dto;
     }
 
     public PersonDTO update(PersonDTO personDTO) {
         logger.info("Updating one person!");
-        var entity = repository.findById(personDTO.getId())
+
+        var entity = repository.findById(personDTO.getKey())
                 .orElseThrow(() -> new ResourceNotFoundException("No records found for this ID!"));
 
         entity.setFirstName(personDTO.getFirstName());
@@ -45,13 +65,18 @@ public class PersonServices {
         entity.setAddress(personDTO.getAddress());
         entity.setGender(personDTO.getGender());
 
-        return ObjectMapper.parseObject(repository.save(entity), PersonDTO.class);
+        var dto = ObjectMapper.parseObject(repository.save(entity), PersonDTO.class);
+        dto.add(linkTo(methodOn(PersonController.class).findById(dto.getKey())).withSelfRel());
+
+        return dto;
     }
 
     public void delete(Long id) {
         logger.info("Deleting one person!");
+
         var entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("No records found for this ID!"));
+
         repository.delete(entity);
     }
 }
