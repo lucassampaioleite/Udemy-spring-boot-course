@@ -2,6 +2,7 @@ package leite.sampaio.lucas.services;
 
 import leite.sampaio.lucas.controllers.PersonController;
 import leite.sampaio.lucas.dto.PersonDTO;
+import leite.sampaio.lucas.exceptions.RequiredObjectIsNullException;
 import leite.sampaio.lucas.exceptions.ResourceNotFoundException;
 import leite.sampaio.lucas.mapper.ObjectMapper;
 import leite.sampaio.lucas.model.Person;
@@ -46,6 +47,8 @@ public class PersonServices {
     public PersonDTO create(PersonDTO personDTO) {
         logger.info("Creating one person!");
 
+        if (personDTO == null) throw new RequiredObjectIsNullException();
+
         var entity = repository.save(ObjectMapper.parseObject(personDTO, Person.class));
 
         var dto = ObjectMapper.parseObject(entity, PersonDTO.class);
@@ -56,6 +59,8 @@ public class PersonServices {
 
     public PersonDTO update(PersonDTO personDTO) {
         logger.info("Updating one person!");
+
+        if (personDTO == null) throw new RequiredObjectIsNullException();
 
         var entity = repository.findById(personDTO.getKey())
                 .orElseThrow(() -> new ResourceNotFoundException("No records found for this ID!"));
